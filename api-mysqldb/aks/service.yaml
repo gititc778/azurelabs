@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: employees-app
+  namespace: app
+  labels:
+    app: employees-app
+spec:
+  type: ClusterIP
+  selector:
+    app: employees-app
+  ports:
+    - name: http
+      port: 80
+      targetPort: http

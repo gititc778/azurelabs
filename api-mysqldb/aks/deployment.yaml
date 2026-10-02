@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: python-app
+  namespace: dev
+
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: python-app
+
+  template:
+    metadata:
+      labels:
+        app: python-app
+        azure.workload.identity/use: "true"
+
+    spec:
+      serviceAccountName: app-sa
+
+      containers:
+        - name: python-app
+          image: deveuw2cr01.azurecr.io/pythonapp:v1
+
+          ports:
+            - containerPort: 8080
+
+          env:
+            - name: KEY_VAULT_URL
+              value: https://dev-euw2-kv-02.vault.azure.net/
+
+            - name: SECRET_NAME
+              value: dbpass
+
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 5
+
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 10
+
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+
+            limits:
+              cpu: 500m
+              memory: 256Mi
